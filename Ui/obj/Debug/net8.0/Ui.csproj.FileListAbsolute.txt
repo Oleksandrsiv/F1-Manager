@@ -1,0 +1,17 @@
+C:\Users\Comp\VSC\CourseW\Ui\bin\Debug\net8.0\Ui.deps.json
+C:\Users\Comp\VSC\CourseW\Ui\bin\Debug\net8.0\Ui.dll
+C:\Users\Comp\VSC\CourseW\Ui\bin\Debug\net8.0\Ui.pdb
+C:\Users\Comp\VSC\CourseW\Ui\bin\Debug\net8.0\Ai.Lib.dll
+C:\Users\Comp\VSC\CourseW\Ui\bin\Debug\net8.0\Car.Lib.dll
+C:\Users\Comp\VSC\CourseW\Ui\bin\Debug\net8.0\Ai.Lib.pdb
+C:\Users\Comp\VSC\CourseW\Ui\bin\Debug\net8.0\Car.Lib.pdb
+C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\Ui.csproj.AssemblyReference.cache
+C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\Ui.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\Ui.AssemblyInfoInputs.cache
+C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\Ui.AssemblyInfo.cs
+C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\Ui.csproj.CoreCompileInputs.cache
+C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\Ui.csproj.Up2Date
+C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\Ui.dll
+C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\refint\Ui.dll
+C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\Ui.pdb
+C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\ref\Ui.dll

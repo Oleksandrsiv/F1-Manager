@@ -1,0 +1,15 @@
+C:\Users\Comp\VSC\CourseW\Ai.Lib\bin\Debug\net8.0\Ai.Lib.deps.json
+C:\Users\Comp\VSC\CourseW\Ai.Lib\bin\Debug\net8.0\Ai.Lib.dll
+C:\Users\Comp\VSC\CourseW\Ai.Lib\bin\Debug\net8.0\Ai.Lib.pdb
+C:\Users\Comp\VSC\CourseW\Ai.Lib\bin\Debug\net8.0\Car.Lib.dll
+C:\Users\Comp\VSC\CourseW\Ai.Lib\bin\Debug\net8.0\Car.Lib.pdb
+C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\Ai.Lib.csproj.AssemblyReference.cache
+C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\Ai.Lib.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\Ai.Lib.AssemblyInfoInputs.cache
+C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\Ai.Lib.AssemblyInfo.cs
+C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\Ai.Lib.csproj.CoreCompileInputs.cache
+C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\Ai.Lib.csproj.Up2Date
+C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\Ai.Lib.dll
+C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\refint\Ai.Lib.dll
+C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\Ai.Lib.pdb
+C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\ref\Ai.Lib.dll
