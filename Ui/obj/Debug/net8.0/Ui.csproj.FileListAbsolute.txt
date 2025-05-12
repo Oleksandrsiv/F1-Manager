@@ -15,3 +15,4 @@ C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\Ui.dll
 C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\refint\Ui.dll
 C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\Ui.pdb
 C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\ref\Ui.dll
+C:\Users\Comp\VSC\CourseW\Ui\obj\Debug\net8.0\Ui.sourcelink.json

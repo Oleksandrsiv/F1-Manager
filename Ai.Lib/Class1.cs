@@ -20,7 +20,7 @@ public class AIController
     double fuelNeeded = distanceLeft * car.FuelConsumption1km;
     bool fuelEnoughToFinish = car.CurrentAmountOfFuel >= fuelNeeded;
 
-    bool needRefuel = !fuelEnoughToFinish;
+    //bool needRefuel = !fuelEnoughToFinish;
     bool needTires = car.TireCondition < 25;
 
     bool badWeather = weatherManager.CurrentWeather != "Sunny";

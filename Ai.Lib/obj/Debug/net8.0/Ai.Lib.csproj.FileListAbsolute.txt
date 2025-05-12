@@ -13,3 +13,4 @@ C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\Ai.Lib.dll
 C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\refint\Ai.Lib.dll
 C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\Ai.Lib.pdb
 C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\ref\Ai.Lib.dll
+C:\Users\Comp\VSC\CourseW\Ai.Lib\obj\Debug\net8.0\Ai.Lib.sourcelink.json

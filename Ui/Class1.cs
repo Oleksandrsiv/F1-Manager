@@ -92,7 +92,8 @@ public class RaceInterface : IRaceInterface
         Console.WriteLine($"Weather: {_weather.CurrentWeather}, Temperature: {_weather.TemperatureCelsius}°C");
         Console.WriteLine("Player car status:");
         Console.WriteLine($"  Fuel: {_playerData.Car.CurrentAmountOfFuel:F1} / {_playerData.Car.MaxVolumeOfTank} L");
-        Console.WriteLine($"  Tires: {GetTireName(_playerData.Car.TypeOfTire)}, Wear: {_playerData.Car.TireCondition}%");
+        Console.WriteLine($"  Tires: {_playerData.Car.GetTireName()}, Wear: {_playerData.Car.TireCondition}%");
+        System.Console.WriteLine($" Pace: {_playerData.Car.Pace}");
     }
 
     public void OfferPitStop()
@@ -108,6 +109,12 @@ public class RaceInterface : IRaceInterface
         }
 
         Console.WriteLine("Pit stop started.");
+
+        bool isValid = false;
+        byte? newTire;
+        
+        //ile(!isValid)
+        //
         Console.WriteLine("Choose tire type:");
         Console.WriteLine("1. Soft");
         Console.WriteLine("2. Medium");
@@ -115,11 +122,11 @@ public class RaceInterface : IRaceInterface
         Console.WriteLine("4. Wet");
         string tyreInput = Console.ReadLine();
 
-        byte? newTire = tyreInput switch
+        newTire = tyreInput switch
         {
-            "1" => 3,
+            "1" => 1,
             "2" => 2,
-            "3" => 1,
+            "3" => 3,
             "4" => 4,
             _ => null
         };
@@ -128,6 +135,11 @@ public class RaceInterface : IRaceInterface
         {
             Console.WriteLine("Invalid tire selection. Tires not changed.");
         }
+        // else
+        // {
+        //     isValid = true;
+        // }        
+        //
 
         Console.WriteLine($"How many liters of fuel to add? (max: {_playerData.Car.MaxVolumeOfTank - _playerData.Car.CurrentAmountOfFuel} L)");
         try
@@ -179,21 +191,11 @@ public class RaceInterface : IRaceInterface
         foreach (var car in rankedCars)
         {
             string status = car.Car.Dnf ? "DNF" : $"{car.LastLapTime:F2}s ({car.Car.TireCondition}%)";
-            Console.WriteLine($"{car.Car.Team,-10} | Tire: {GetTireName(car.Car.TypeOfTire),-6} | Time: {status}");
+            Console.WriteLine($"{car.Car.Team,-10} | Tire: {car.Car.GetTireName(),-6} | Time: {status}");
         }
     }
 
-    private string GetTireName(byte type)
-    {
-        return type switch
-        {
-            1 => "Hard",
-            2 => "Medium",
-            3 => "Soft",
-            4 => "Wet",
-            _ => "Unknown"
-        };
-    }
+    
 
 
     

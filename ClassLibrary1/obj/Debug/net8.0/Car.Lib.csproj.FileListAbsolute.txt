@@ -9,3 +9,4 @@ C:\Users\Comp\VSC\CourseW\ClassLibrary1\obj\Debug\net8.0\Car.Lib.dll
 C:\Users\Comp\VSC\CourseW\ClassLibrary1\obj\Debug\net8.0\refint\Car.Lib.dll
 C:\Users\Comp\VSC\CourseW\ClassLibrary1\obj\Debug\net8.0\Car.Lib.pdb
 C:\Users\Comp\VSC\CourseW\ClassLibrary1\obj\Debug\net8.0\ref\Car.Lib.dll
+C:\Users\Comp\VSC\CourseW\ClassLibrary1\obj\Debug\net8.0\Car.Lib.sourcelink.json

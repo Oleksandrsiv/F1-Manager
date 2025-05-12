@@ -20,3 +20,4 @@ C:\Users\Comp\VSC\CourseW\ConsoleApp\obj\Debug\net8.0\refint\ConsoleApp.dll
 C:\Users\Comp\VSC\CourseW\ConsoleApp\obj\Debug\net8.0\ConsoleApp.pdb
 C:\Users\Comp\VSC\CourseW\ConsoleApp\obj\Debug\net8.0\ConsoleApp.genruntimeconfig.cache
 C:\Users\Comp\VSC\CourseW\ConsoleApp\obj\Debug\net8.0\ref\ConsoleApp.dll
+C:\Users\Comp\VSC\CourseW\ConsoleApp\obj\Debug\net8.0\ConsoleApp.sourcelink.json

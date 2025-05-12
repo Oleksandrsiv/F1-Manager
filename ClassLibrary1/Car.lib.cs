@@ -94,7 +94,7 @@ public class CarF1
 
     if (pace < 1 || pace > 3)
     {
-        Console.WriteLine("Невірний темп! Оберіть 1 (Агресивний), 2 (Нормальний) або 3 (Економний).");
+        Console.WriteLine("invalid pace! Choose between 1 (Economic), 2 (Normal) or 3 (Aggressive).");
         isValid = false;
         return;
     }
@@ -102,6 +102,30 @@ public class CarF1
     Pace = pace;
     }
     
+    public void SetTireType(byte typeOfTire, out bool isValid)
+    {
+        isValid = true; 
+        if (typeOfTire < 1 || typeOfTire > 4)
+        {
+            Console.WriteLine("Invalid tire type! Choose between 1 (Soft), 2 (Medium), 3 (Hard) or 4 (Wet).");
+            isValid = false;
+            return;
+        }
+        TypeOfTire = typeOfTire;
+        TireCondition = 100; 
+    }
+
+    public string GetTireName()
+    {
+        return TypeOfTire switch
+        {
+            1 => "Soft",
+            2 => "Medium",
+            3 => "Hard",
+            4 => "Wet",
+            _ => "Unknown"
+        };
+    }
 
     public void SetMultipliers(WeatherManager weatherManager)
     {
@@ -114,7 +138,7 @@ public class CarF1
         1 => 0.9, // economic
         2 => 1.0, // normal
         3 => 1.3, // aggressive
-        _ => 1.0
+        _ => 1.0 // default to normal
     };
 
     _tireMultiplier = (100 - TireCondition) / 100.0;
@@ -125,12 +149,12 @@ public class CarF1
         2 => (0.5, 1.0),  // medium
         3 => (0.2, 0.8),  // hard
         4 => (0.6, 0.6),  // wet
-        _ => (0.5, 1.0) //try again, 
+        _ => (0.5, 1.0)   // default to medium
     };
 
 
     // weather penalty
-    double weatherPenalty = WeatherManager.TyreWear(temperature) / 100.0;
+    double weatherPenalty = WeatherManager.TyreWeather(temperature) / 100.0;
 
     if ((TypeOfTire <= 3) && (weather == "Rainy"))
     {
@@ -144,10 +168,10 @@ public class CarF1
         _typeWearMultiplier += 0.3;
     }
 
-    _typeWearMultiplier *= weatherPenalty; //0?
+    _typeWearMultiplier *= weatherPenalty; //0? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     // speed penalty 
-    TopSpeed = TopSpeed * (1 - _tireMultiplier);
+    TopSpeed = TopSpeed * (1 - _tireMultiplier); 
     }
 
     public double FuelConsumption1km => BaseFuelConsumption1km * _paceMultiplier;  
@@ -156,7 +180,7 @@ public class CarF1
     public bool Ride(double distanceKm)
     {
         double fuelNeeded = FuelConsumption1km * distanceKm;
-        if (CurrentAmountOfFuel < fuelNeeded)
+        if (CurrentAmountOfFuel < fuelNeeded)   
         { 
          return false;
         }
@@ -186,20 +210,6 @@ public class CarF1
     }
 
 
-    public bool ChangeTire(byte newTireType)
-    {
-    if (newTireType < 1 || newTireType > 4)
-    {
-        Console.WriteLine("Invalid tire type! Choose between 1 (Hard), 2 (Medium), 3 (Soft) or 4 (Wet).");
-        return false;
-    }
-
-    TypeOfTire = newTireType;
-    TireCondition = 100; 
-    return true;
-    }
-
-
     public void PitStop(double amountOfRefilledFuel,WeatherManager weatherManager, byte? newTireType = null)
     {
         IsPitStop = true;
@@ -211,11 +221,14 @@ public class CarF1
             _pitStopPenalty += 10;
         }
 
-        if (newTireType.HasValue && newTireType >= 1 && newTireType <= 3 && newTireType != TypeOfTire)
-        {
-            ChangeTire(newTireType.Value);
+       if (newTireType.HasValue && newTireType >= 1 && newTireType <= 4)
+       {
+            SetTireType(newTireType.Value, out _);
             _pitStopPenalty += 12;
-        }
+            Console.WriteLine($"[{Team}] PIT STOP: New tire type set to {GetTireName()}");
+       }
+        
+
 
         SetMultipliers(weatherManager);
     }
@@ -443,7 +456,7 @@ public class WeatherManager
         {
             GenerateWeather();
 
-            double wearMultiplier = TyreWear(TemperatureCelsius) / 100.0; 
+            double wearMultiplier = TyreWeather(TemperatureCelsius) / 100.0; 
             foreach (var carForeach in cars) 
             {
                 carForeach.SetMultipliers(this);
@@ -455,7 +468,7 @@ public class WeatherManager
         return false;   
     }
 
-    public static double TyreWear(double temperature)
+    public static double TyreWeather(double temperature)
     {
         double optimalTemp = 25;
         double diff = Math.Abs(temperature - optimalTemp);
