@@ -28,7 +28,7 @@ public class RaceInterface : IRaceInterface
         _track = track;
         _weather = weather;
         _totalLaps = totalLaps;
-        _aiController = new AIController(totalLaps);
+        _aiController = new AIController();
     }
 
     public void AskPlayerPace()
@@ -110,99 +110,134 @@ public class RaceInterface : IRaceInterface
 
         Console.WriteLine("Pit stop started.");
 
-        bool isValid = false;
-        byte? newTire;
-        
-        //ile(!isValid)
-        //
-        Console.WriteLine("Choose tire type:");
-        Console.WriteLine("1. Soft");
-        Console.WriteLine("2. Medium");
-        Console.WriteLine("3. Hard");
-        Console.WriteLine("4. Wet");
-        string tyreInput = Console.ReadLine();
+        byte? newTire = null;
 
-        newTire = tyreInput switch
+        // tire
+        while (true)
         {
-            "1" => 1,
-            "2" => 2,
-            "3" => 3,
-            "4" => 4,
-            _ => null
-        };
+            Console.WriteLine("Choose tire type:");
+            Console.WriteLine("1. Soft");
+            Console.WriteLine("2. Medium");
+            Console.WriteLine("3. Hard");
+            Console.WriteLine("4. Wet");
+            string tyreInput = Console.ReadLine();
 
-        if (newTire == null)
-        {
-            Console.WriteLine("Invalid tire selection. Tires not changed.");
+            newTire = tyreInput switch
+            {
+                "1" => 1,
+                "2" => 2,
+                "3" => 3,
+                "4" => 4,
+                _ => null
+            };
+
+            if (newTire == null)
+            {
+                Console.WriteLine("Invalid tire selection. Please try again.");
+            }
+            else
+            {
+                break;
+            }
         }
-        // else
-        // {
-        //     isValid = true;
-        // }        
-        //
 
-        Console.WriteLine($"How many liters of fuel to add? (max: {_playerData.Car.MaxVolumeOfTank - _playerData.Car.CurrentAmountOfFuel} L)");
-        try
+        //fuel 
+        double fuelToAdd = 0;
+        double availableSpace = _playerData.Car.MaxVolumeOfTank - _playerData.Car.CurrentAmountOfFuel;
+
+        while (true)
         {
-            double fuelToAdd = double.Parse(Console.ReadLine());
-            double availableSpace = _playerData.Car.MaxVolumeOfTank - _playerData.Car.CurrentAmountOfFuel;
+            Console.WriteLine($"How many liters of fuel to add? (max: {availableSpace} L)");
+            string fuelInput = Console.ReadLine();
+
+            if (!double.TryParse(fuelInput, out fuelToAdd))
+            {
+                Console.WriteLine("Error: Invalid number entered. Please try again.");
+                continue;
+            }
 
             if (fuelToAdd <= 0)
             {
                 Console.WriteLine("Please enter a positive number.");
+                continue;
             }
-            else if (fuelToAdd > availableSpace)
+
+            if (fuelToAdd > availableSpace)
             {
                 Console.WriteLine("Too much! Not enough space in the tank.");
+                continue;
             }
-            else
-            {
-                _playerData.Car.PitStop(fuelToAdd, _weather, newTire);
-                Console.WriteLine($"Pit stop complete. {fuelToAdd} L of fuel added.");
-            }
+
+            break;
         }
-        catch
-        {
-            Console.WriteLine("Error: Invalid number entered.");
-        }
+
+        // pit
+        _playerData.Car.PitStop(fuelToAdd, _weather, newTire);
+        Console.WriteLine($"Pit stop complete. {fuelToAdd} L of fuel added.");
     }
 
-    public void ShowFinalResults()
+
+   public void ShowFinalResults()
     {
         Console.Clear();
         Console.WriteLine("\nRace finished!");
         Console.WriteLine(new string('-', 40));
 
-        List<CarRaceData> results = new List<CarRaceData>(_raceManager.CarsOnTrackReadOnly);
+        List<CarRaceData> results = _raceManager.GetSortedCars();
+
         int position = 1;
-        foreach (var car in results.OrderBy(c => c.TotalRaceTime))
+        foreach (var car in results)
         {
-            string result = car.Car.Dnf ? "DNF" : $"{car.TotalRaceTime:F2}s";
-            Console.WriteLine($"{position++}. {car.Car.Team,-10} | Result: {result}");
+          string result = car.Car.Dnf ? "DNF" : $"{car.TotalRaceTime:F2}s";
+          Console.WriteLine($"{position++}. {car.Car.Team,-10} | Result: {result}");
         }
     }
+
 
     public void ShowLapResults()
     {
-        var rankedCars = _raceManager.CarsOnTrackReadOnly
-            .OrderBy(c => c.TotalRaceTime)
-            .ToList();
+        var rankedCars = _raceManager.GetSortedCars();
 
         foreach (var car in rankedCars)
         {
-            string status = car.Car.Dnf ? "DNF" : $"{car.LastLapTime:F2}s ({car.Car.TireCondition}%)";
+            string status;
+            if (car.Car.Dnf)
+            {
+                status = "DNF";
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
+            else
+            {
+                double diff = car.LastLapTime - car.PreviousLapTime;
+
+                if (Math.Abs(diff) <= 0.5)
+                {
+                    Console.ForegroundColor = ConsoleColor.White; //  +-0.5 - white
+                }
+                else if (diff < -0.5)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green; // rather than ideal на >0.5
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;   // slower than ideal на >0.5
+                }
+
+                status = $"{car.LastLapTime:F2}s ({car.Car.TireCondition}%)";
+            }
+
             Console.WriteLine($"{car.Car.Team,-10} | Tire: {car.Car.GetTireName(),-6} | Time: {status}");
+            Console.ResetColor();
         }
     }
 
-    
 
-
-    
 }
 
+
+
 public static class CarFactory
-    {
+{
     private static readonly Random _rand = new();
 
     public static CarF1 CreateRandomizedCar(string team)
@@ -213,7 +248,7 @@ public static class CarFactory
         int maxVolumeOfTank = ApplyVariance(100, 5); // 100 L
         double baseFuelConsumption1km = ApplyVarianceDouble(0.85, 5); // fuel consumption 0.85 L/km
         double amountOfFuel = ApplyVarianceDouble(90.0, 5); // starting fuel
-        byte typeOfTire = 2; // Medium
+        byte typeOfTire = 1; // Soft
         byte tireCondition = 100;
 
         return new CarF1(team, topSpeed, mileage, pace, maxVolumeOfTank, baseFuelConsumption1km, amountOfFuel, typeOfTire, tireCondition);
@@ -230,5 +265,5 @@ public static class CarFactory
         double variance = baseValue * percent / 100.0;
         return Math.Round(baseValue + (_rand.NextDouble() * 2 - 1) * variance, 2);
     }
-    }
+}
 

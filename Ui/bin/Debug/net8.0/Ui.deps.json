@@ -21,7 +21,7 @@
         },
         "runtime": {
           "Ai.Lib.dll": {
-            "assemblyVersion": "1.0.0",
+            "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
         }
@@ -29,7 +29,7 @@
       "Car.Lib/1.0.0": {
         "runtime": {
           "Car.Lib.dll": {
-            "assemblyVersion": "1.0.0",
+            "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
         }

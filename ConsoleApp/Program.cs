@@ -5,11 +5,10 @@
 class Program
 {
     static void Main()
-    {
+    {   
         Console.InputEncoding = System.Text.Encoding.UTF8;
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-        
         WeatherManager weatherManager = new WeatherManager();
         Track track = new Track(weatherManager);
 
@@ -63,6 +62,12 @@ class Program
             Console.Clear();
             Console.WriteLine($"\nlap {lap}/{totalLaps}");
             Console.WriteLine(new string('-', 50));
+
+            if (playerCar.Dnf)
+            {
+                System.Console.WriteLine($"You did not finish! \nRace is over!");
+                raceInterface.ShowFinalResults();
+            }
 
             raceInterface.AskPlayerPace();
             raceInterface.OfferPitStop();

@@ -168,7 +168,7 @@ public class CarF1
         _typeWearMultiplier += 0.3;
     }
 
-    _typeWearMultiplier *= weatherPenalty; //0? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    _typeWearMultiplier *= weatherPenalty; 
 
     // speed penalty 
     TopSpeed = TopSpeed * (1 - _tireMultiplier); 
@@ -225,7 +225,6 @@ public class CarF1
        {
             SetTireType(newTireType.Value, out _);
             _pitStopPenalty += 12;
-            Console.WriteLine($"[{Team}] PIT STOP: New tire type set to {GetTireName()}");
        }
         
 
@@ -240,7 +239,7 @@ public class CarF1
         CarF1 car = this;
         if (car.Dnf) 
         {
-            return double.MaxValue; // DNF, return max value
+            return double.MaxValue; // DNF, return min value
         }
 
 
@@ -263,23 +262,30 @@ public static class IncidentManager
 
     public static bool CheckForIncident(CarF1 car, Track track, WeatherManager weather)
     {
+        double totalProbability = 0.0;
 
-        double tirePenalty = (100 - car.TireCondition) / 100.0;
-        double baseProbability = 0.2 * tirePenalty;
+        bool isWet = weather.CurrentWeather == "Rainy";
+        bool tireMismatch = isWet && car.TypeOfTire != 4; // if rainy and without Wet
 
-        
-        double weatherPenalty = weather.CurrentWeather switch //snow?
+        if (tireMismatch)
         {
-            "Rainy" => 0.1,
-            _ => 0.0
-        };
-
-        double totalProbability = baseProbability + weatherPenalty;
-
+            // if rainy and without Wet  (from 20 to 40%)
+            totalProbability += 0.2 + ((100 - car.TireCondition) / 100.0) * 0.2;
+        }
+        else
+        {
+            // === 2. Звичайний ризик через знос ===
+            if (car.TireCondition < 40)
+            {
+                double tirePenalty = (40 - car.TireCondition) / 60.0; // from 0 to 1
+                totalProbability += 0.05 * tirePenalty; // мax 5%
+            }
+        }
 
         return random.NextDouble() < totalProbability;
     }
 }
+
 
 
 public class CarRaceData
@@ -288,8 +294,8 @@ public class CarRaceData
     public double LastLapTime { get; private set; }
     public double TotalRaceTime { get; private set; }
     public double IdealLapTime { get;  set; }
+    public double PreviousLapTime { get; private set; }
 
-    //dnf
 
     public CarRaceData(CarF1 car)
     {
@@ -297,15 +303,16 @@ public class CarRaceData
     }
 
     public void UpdateList(double lapTime, Track track, WeatherManager weather)
-{
-    Car.Dnf = IncidentManager.CheckForIncident(Car, track, weather); 
-
-    if (!Car.Dnf) // ref laptime 
     {
-        LastLapTime = lapTime;
-        TotalRaceTime += lapTime;
+        Car.Dnf = IncidentManager.CheckForIncident(Car, track, weather); 
+
+        if (!Car.Dnf) 
+        {
+            PreviousLapTime = LastLapTime;
+            LastLapTime = lapTime;
+            TotalRaceTime += lapTime;
+        }
     }
-}
 
 
     
@@ -323,159 +330,170 @@ public class RaceManager
 
     public void SortListOfCars()
     {
-        var rankedCars =carsOnTrack
-            .OrderBy(c => c.TotalRaceTime)
+        var sorted = carsOnTrack.OrderBy(c => c.TotalRaceTime).ToList();
+        carsOnTrack.Clear();
+        carsOnTrack.AddRange(sorted);
+    }
+    
+    public List<CarRaceData> GetSortedCars()
+    {
+        return carsOnTrack
+            .OrderBy(car => car.Car.Dnf) // Спочатку всі, де Dnf == false (фінішували), потім true (DNF)
+            .ThenBy(c => c.TotalRaceTime)
             .ToList();
     }
 
+
+
+
     public void ApplyMultipliersToAllCars(WeatherManager weatherManager)
     {
-    foreach (var car in carsOnTrack)
-    {
-        car.SetMultipliers(weatherManager);
-    }
-    
+        foreach (var car in carsOnTrack)
+        {
+            car.SetMultipliers(weatherManager);
+        }
+
     }
 
     public IReadOnlyList<CarRaceData> CarsOnTrackReadOnly => carsOnTrack.AsReadOnly();
 }
 
-//
-public class RaceSession
-{
-    private readonly Track _track;
-    private readonly WeatherManager _weatherManager;
-    private readonly RaceManager _raceManager;
-    private readonly LapSimulator _lapSimulator;
 
-    public RaceSession()
+    public class RaceSession
     {
-        _weatherManager = new WeatherManager();
-        _track = new Track(_weatherManager); // передаємо weatherManager в трек
-        _raceManager = new RaceManager();
-        _lapSimulator = new LapSimulator(_track, _weatherManager);
-    }
+        private readonly Track _track;
+        private readonly WeatherManager _weatherManager;
+        private readonly RaceManager _raceManager;
+        private readonly LapSimulator _lapSimulator;
 
-    public void RegisterCar(CarF1 car)
-    {
-        var raceData = new CarRaceData(car);
-        raceData.IdealLapTime = _track.CalculateIdealTime(car.TopSpeed);
-        _raceManager.RegisterCar(raceData);
-    }
-
-    public bool SimulateLap()
-    {
-        bool weatherChanged = _weatherManager.UpdateWeather(_raceManager.CarsOnTrackReadOnly.ToList());
-        bool allFinished = true;
-
-        foreach (var carData in _raceManager.CarsOnTrackReadOnly)
+        public RaceSession()
         {
-            bool lapFinished = _lapSimulator.SimulateLap(carData);
-            if (!lapFinished)
-            {
-                carData.Car.Dnf = true;
-                allFinished = false;
-            }
+            _weatherManager = new WeatherManager();
+            _track = new Track(_weatherManager); 
+            _raceManager = new RaceManager();
+            _lapSimulator = new LapSimulator(_track, _weatherManager);
         }
 
-        return allFinished;
-    }
-
-    public IReadOnlyList<CarRaceData> GetRaceData() => _raceManager.CarsOnTrackReadOnly;
-
-    public Track Track => _track;
-    public WeatherManager Weather => _weatherManager;
-}
-
-//
-
-public class LapSimulator
-{
-    private readonly Track _track;
-    private readonly WeatherManager _weather;
-
-    public LapSimulator(Track track, WeatherManager weather)
-    {
-        _track = track;
-        _weather = weather;
-    }
-
-    public bool SimulateLap(CarRaceData data)
-    {
-        data.SetMultipliers(_weather);
-
-
-        if (data.Car.Dnf) return false;
-
-        bool success = data.Car.Ride(_track.LengthKm);
-        if (!success) return false;
-
-        double lapTime = data.Car.CalculateLapTime(data.IdealLapTime);
-
-        data.UpdateList(lapTime, _track, _weather);
-        return true;
-    }
-}
-
-public class WeatherManager
-{
-    private static Random random = new Random();
-    public string CurrentWeather { get; private set; }
-    public byte TemperatureCelsius { get; private set; }
-    private byte _weatherChangeInterval;
-    private byte _lapsSinceWeatherChange = 0;
-
-    public WeatherManager()
-    {
-        GenerateWeather();
-    }
-
-    public void GenerateWeather()
-    {
-        byte weatherIndex = (byte)random.Next(0, 3);
-        CurrentWeather = weatherIndex switch
+        public void RegisterCar(CarF1 car)
         {
-            0 => "Sunny",
-            1 => "Rainy",
-            _ => "Sunny"
-        };
+            var raceData = new CarRaceData(car);
+            raceData.IdealLapTime = _track.CalculateIdealTime(car.TopSpeed);
+            _raceManager.RegisterCar(raceData);
+        }
 
-        TemperatureCelsius = CurrentWeather switch
+        public bool SimulateLap()
         {
-            "Sunny" => (byte)random.Next(15, 31),
-            "Rainy" => (byte)random.Next(5, 21),
-            _ => 20
-        };
-        _weatherChangeInterval = (byte)random.Next(5, 11);
-    }
+            bool weatherChanged = _weatherManager.UpdateWeather(_raceManager.CarsOnTrackReadOnly.ToList());
+            bool allFinished = true;
 
-    public bool UpdateWeather(List<CarRaceData> cars)
-    {
-        _lapsSinceWeatherChange++;
-        if (_lapsSinceWeatherChange >= _weatherChangeInterval)
-        {
-            GenerateWeather();
-
-            double wearMultiplier = TyreWeather(TemperatureCelsius) / 100.0; 
-            foreach (var carForeach in cars) 
+            foreach (var carData in _raceManager.CarsOnTrackReadOnly)
             {
-                carForeach.SetMultipliers(this);
+                bool lapFinished = _lapSimulator.SimulateLap(carData);
+                if (!lapFinished)
+                {
+                    carData.Car.Dnf = true;
+                    allFinished = false;
+                }
             }
 
-            _lapsSinceWeatherChange = 0;
+            return allFinished;
+        }
+
+        public IReadOnlyList<CarRaceData> GetRaceData() => _raceManager.CarsOnTrackReadOnly;
+
+        public Track Track => _track;
+        public WeatherManager Weather => _weatherManager;
+    }
+
+    //
+
+    public class LapSimulator
+    {
+        private readonly Track _track;
+        private readonly WeatherManager _weather;
+
+        public LapSimulator(Track track, WeatherManager weather)
+        {
+            _track = track;
+            _weather = weather;
+        }
+
+        public bool SimulateLap(CarRaceData data)
+        {
+            data.SetMultipliers(_weather);
+
+
+            if (data.Car.Dnf) return false;
+
+            bool success = data.Car.Ride(_track.LengthKm);
+            if (!success) return false;
+
+            double lapTime = data.Car.CalculateLapTime(data.IdealLapTime);
+
+            data.UpdateList(lapTime, _track, _weather);
             return true;
         }
-        return false;   
     }
 
-    public static double TyreWeather(double temperature)
+    public class WeatherManager
     {
-        double optimalTemp = 25;
-        double diff = Math.Abs(temperature - optimalTemp);
-        int sign = Math.Sign(temperature - optimalTemp); // -1, 0 , 1
-        return 100 + (2 + sign) * diff;  
-    }   
-} 
+        private static Random random = new Random();
+        public string CurrentWeather { get; private set; }
+        public byte TemperatureCelsius { get; private set; }
+        private byte _weatherChangeInterval;
+        private byte _lapsSinceWeatherChange = 0;
+
+        public WeatherManager()
+        {
+            GenerateWeather();
+        }
+
+        public void GenerateWeather()
+        {
+            byte weatherIndex = (byte)random.Next(0, 3);
+            CurrentWeather = weatherIndex switch
+            {
+                0 => "Sunny",
+                1 => "Rainy",
+                _ => "Sunny"
+            };
+
+            TemperatureCelsius = CurrentWeather switch
+            {
+                "Sunny" => (byte)random.Next(15, 31),
+                "Rainy" => (byte)random.Next(5, 21),
+                _ => 20
+            };
+            _weatherChangeInterval = (byte)random.Next(5, 11);
+        }
+
+        public bool UpdateWeather(List<CarRaceData> cars)
+        {
+            _lapsSinceWeatherChange++;
+            if (_lapsSinceWeatherChange >= _weatherChangeInterval)
+            {
+                GenerateWeather();
+
+                double wearMultiplier = TyreWeather(TemperatureCelsius) / 100.0; 
+                foreach (var carForeach in cars) 
+                {
+                    carForeach.SetMultipliers(this);
+                }
+
+                _lapsSinceWeatherChange = 0;
+                return true;
+            }
+            return false;   
+        }
+
+        public static double TyreWeather(double temperature)
+        {
+            double optimalTemp = 25;
+            double diff = Math.Abs(temperature - optimalTemp);
+            int sign = Math.Sign(temperature - optimalTemp); // -1, 0 , 1
+            return 100 + (2 + sign) * diff;  
+        }   
+    } 
 
 
 
