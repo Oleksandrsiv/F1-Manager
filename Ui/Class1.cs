@@ -9,7 +9,8 @@ public interface IRaceInterface
     void ShowRaceStatistics();
     void OfferPitStop();
     void ShowFinalResults();
-    void ShowLapResults();
+    void ShowLapResults(int lap, int totalLaps);
+
 }
 public class RaceInterface : IRaceInterface
 {
@@ -20,6 +21,7 @@ public class RaceInterface : IRaceInterface
     private readonly AIController _aiController;
     private int _currentLap;
     private int _totalLaps;
+    Arrows arrows = new Arrows();
 
     public RaceInterface(CarRaceData playerCarData, RaceManager raceManager, Track track, WeatherManager weather, int totalLaps)
     {
@@ -33,22 +35,12 @@ public class RaceInterface : IRaceInterface
 
     public void AskPlayerPace()
     {
-        while (true)
-        {
-            Console.WriteLine("Choose your race pace:");
-            Console.WriteLine("1. Aggressive");
-            Console.WriteLine("2. Normal");
-            Console.WriteLine("3. Economic");
-            string paceInput = Console.ReadLine();
+        string[] paceOptions = { "Aggressive", "Normal", "Economic" };
+        int selection = arrows.ShowArrowMenu("Choose your race pace:", paceOptions);
 
-            if (byte.TryParse(paceInput, out byte pace))
-            {
-                _playerData.Car.SetPace(pace, out bool isValid);
-                if (isValid) break;
-            }
-
-            Console.WriteLine("Invalid value. Please try again.");
-        }
+        _playerData.Car.SetPace((byte)(selection + 1), out bool isValid);
+        Console.WriteLine($"You selected: {paceOptions[selection]}");
+        Thread.Sleep(1000);
     }
 
     public void SimulateLap()
@@ -65,7 +57,6 @@ public class RaceInterface : IRaceInterface
             if (car != _playerData && !car.Car.Dnf)
             {
                 _aiController.AiMakeDecision(car, _track, _weather, _currentLap, _totalLaps);
-                Console.WriteLine($"[AI] {car.Car.Team} | Pace: {car.Car.Pace} | Tire: {car.Car.TypeOfTire} | TireCond: {car.Car.TireCondition:F1}% | Fuel: {car.Car.CurrentAmountOfFuel:F1}L");
             }
         }
 
@@ -99,53 +90,25 @@ public class RaceInterface : IRaceInterface
 
     public void OfferPitStop()
     {
-        Console.WriteLine("Do you want to make a pit stop?");
-        Console.WriteLine("Press 1 for yes, any other key for no.");
-        string input = Console.ReadLine();
+        string[] confirmOptions = { "Yes", "No" };
+        int confirm = arrows.ShowArrowMenu("Do you want to make a pit stop?", confirmOptions);
 
-        if (input != "1")
+        if (confirm != 0)
         {
             Console.WriteLine("You pass the pit lane.\n");
+            Thread.Sleep(500);
             return;
         }
 
         Console.WriteLine("Pit stop started.");
-
-        byte? newTire = null;
-
         // tire
-        while (true)
-        {
-            Console.WriteLine("Choose tire type:");
-            Console.WriteLine("1. Soft");
-            Console.WriteLine("2. Medium");
-            Console.WriteLine("3. Hard");
-            Console.WriteLine("4. Wet");
-            string tyreInput = Console.ReadLine();
-
-            newTire = tyreInput switch
-            {
-                "1" => 1,
-                "2" => 2,
-                "3" => 3,
-                "4" => 4,
-                _ => null
-            };
-
-            if (newTire == null)
-            {
-                Console.WriteLine("Invalid tire selection. Please try again.");
-            }
-            else
-            {
-                break;
-            }
-        }
+        string[] tireOptions = { "Soft", "Medium", "Hard", "Wet" };
+        int tireSelection = arrows.ShowArrowMenu("Choose tire type:", tireOptions);
+        byte? newTire = (byte)(tireSelection + 1);
 
         //fuel 
         double fuelToAdd;
         double availableSpace = _playerData.Car.MaxVolumeOfTank - _playerData.Car.CurrentAmountOfFuel;
-
         while (true)
         {
             Console.WriteLine($"How many liters of fuel to add? (max: {availableSpace} L)");
@@ -157,7 +120,7 @@ public class RaceInterface : IRaceInterface
                 continue;
             }
 
-            if (fuelToAdd <= 0)
+            if (fuelToAdd < 0)
             {
                 Console.WriteLine("Please enter a positive number.");
                 continue;
@@ -172,13 +135,13 @@ public class RaceInterface : IRaceInterface
             break;
         }
 
-        // pit
+        // box
         _playerData.Car.PitStop(fuelToAdd, _weather, newTire);
         Console.WriteLine($"Pit stop complete. {fuelToAdd} L of fuel added.");
     }
 
 
-   public void ShowFinalResults()
+    public void ShowFinalResults()
     {
         Console.Clear();
         Console.WriteLine("\nRace finished!");
@@ -189,58 +152,98 @@ public class RaceInterface : IRaceInterface
         int position = 1;
         foreach (var car in results)
         {
-          string result = car.Car.Dnf ? "DNF" : $"{car.TotalRaceTime:F2}s";
-          Console.WriteLine($"{position++}. {car.Car.Team,-10} | Result: {result}");
+            string result = car.Car.Dnf ? "DNF" : $"{car.TotalRaceTime:F2}s";
+            Console.WriteLine($"{position++}. {car.Car.Team,-10} | Result: {result}");
         }
     }
 
 
-    public void ShowLapResults()
-{
-    var rankedCars = _raceManager.GetSortedCars();
-    double leaderTime = rankedCars.First().TotalRaceTime;
-
-    foreach (var car in rankedCars)
+    public void ShowLapResults(int lap, int totalLaps)
     {
-        string lapTimeText;
-        string gapText = "";
+        Console.WriteLine($"\nlap {lap}/{totalLaps}");
+        Console.WriteLine(new string('-', 50));
 
-        if (car.Car.Dnf)
-        {
-            lapTimeText = "DNF";
-            Console.WriteLine($"{car.Car.Team,-10} | Tire: {car.Car.GetTireName(),-6} | Time: {lapTimeText}");
-        }
-        else
-        {
-            lapTimeText = $"{car.LastLapTime:F2}s ({car.Car.TireCondition}%)";
-            Console.Write($"{car.Car.Team,-10} | Tire: {car.Car.GetTireName(),-6} | Time: {lapTimeText}");
+        var rankedCars = _raceManager.GetSortedCars();
+        double leaderTime = rankedCars.First().TotalRaceTime;
 
-            if (car != rankedCars.First())
+        foreach (var car in rankedCars)
+        {
+            string lapTimeText;
+            string gapText = "";
+
+            if (car.Car.Dnf)
             {
-                double gap = car.TotalRaceTime - leaderTime;
-                gapText = $"+{gap:F2}s";
+                lapTimeText = "DNF";
+                Console.WriteLine($"{car.Car.Team,-10} | - Tire: {car.Car.GetTireName(),-6} | - Time: {lapTimeText}");
+            }
+            else
+            {
+                lapTimeText = $"{car.LastLapTime:F2}s ({car.Car.TireCondition}%)";
+                Console.Write($"{car.Car.Team,-10} | - Tire: {car.Car.GetTireName(),-6} | - Time: {lapTimeText}");
 
-                // set gap color
-                if (gap <= 1)
-                    Console.ForegroundColor = ConsoleColor.Green;
-                else if (gap <= 3)
-                    Console.ForegroundColor = ConsoleColor.White;
-                else
-                    Console.ForegroundColor = ConsoleColor.Red;
+                if (car != rankedCars.First())
+                {
+                    double gap = car.TotalRaceTime - leaderTime;
+                    gapText = $"+{gap:F2}s";
 
-                Console.Write("  Gap: ");
-                Console.Write(gapText);
-                Console.ResetColor();
+                    // set gap color
+                    if (gap <= 1)
+                        Console.ForegroundColor = ConsoleColor.Green;
+                    else if (gap <= 3)
+                        Console.ForegroundColor = ConsoleColor.White;
+                    else
+                        Console.ForegroundColor = ConsoleColor.Red;
+
+                    Console.Write("  Gap: ");
+                    Console.Write(gapText);
+                    Console.ResetColor();
+                }
+
+                Console.WriteLine();
             }
 
-            Console.WriteLine();
+            Console.ResetColor();
         }
-
-        Console.ResetColor();
     }
+
 }
 
+public class Arrows
+{
+    public int ShowArrowMenu(string title, string[] options)
+    {
+        int selectedIndex = 0;
+        ConsoleKey key;
 
+        do
+        {
+            Console.Clear();
+            Console.WriteLine(title);
+            for (int i = 0; i < options.Length; i++)
+            {
+                if (i == selectedIndex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"> {options[i]}");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.WriteLine($"  {options[i]}");
+                }
+            }
+
+            key = Console.ReadKey(true).Key;
+
+            if (key == ConsoleKey.UpArrow && selectedIndex > 0)
+                selectedIndex--;
+            else if (key == ConsoleKey.DownArrow && selectedIndex < options.Length - 1)
+                selectedIndex++;
+
+        } while (key != ConsoleKey.Enter);
+
+        return selectedIndex;
+    }
 }
 
 
@@ -256,7 +259,7 @@ public static class CarFactory
         byte pace = 2; // normal
         int maxVolumeOfTank = ApplyVariance(100, 5); // 100 L
         double baseFuelConsumption1km = ApplyVarianceDouble(0.85, 5); // fuel consumption 0.85 L/km
-        double amountOfFuel = ApplyVarianceDouble(90.0, 5); // starting fuel
+        double amountOfFuel = ApplyVarianceDouble(90.0, 5); // start fuel
         byte typeOfTire = 1; // Soft
         byte tireCondition = 100;
 

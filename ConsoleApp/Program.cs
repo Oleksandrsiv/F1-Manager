@@ -1,28 +1,26 @@
 ﻿using CarsLib;
 
-
-
 class Program
 {
     static void Main()
-    {   
-        Console.InputEncoding = System.Text.Encoding.UTF8;
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
-
+    {
+        Console.Clear();
         WeatherManager weatherManager = new WeatherManager();
         Track track = new Track(weatherManager);
+        Arrows arrows = new Arrows();
 
         Console.WriteLine("Welcome!");
-        Console.Write("Enter count of laps: ");
-        string input = Console.ReadLine();
         int totalLaps;
-
-        if (!int.TryParse(input, out totalLaps) || totalLaps <= 0)
+        while (true)
         {
-            Console.WriteLine("incorrect value. 5 laps have been set by default..");
-            totalLaps = 5;
-            
-        } 
+            Console.Write("Enter count of laps: ");
+            string input = Console.ReadLine();
+
+            if (int.TryParse(input, out totalLaps) && totalLaps > 0)
+                break;
+
+            Console.WriteLine("Invalid input. Please enter a positive integer.");
+        }
 
         Console.Write("Enter name of your team: ");
         string teamName = Console.ReadLine();
@@ -31,20 +29,10 @@ class Program
         CarRaceData playerData = new CarRaceData(playerCar);
         RaceManager raceManager = new RaceManager();
 
-        bool isValid = false;
-        byte tireInput;
-
-        while (!isValid)
-        {
-            Console.WriteLine($"\nChoose type of tires:\n1. Soft\n2. Medium\n3. Hard\n4. Wet");
-            string tryInput = Console.ReadLine();
-
-            if (byte.TryParse(tryInput, out tireInput))
-            {
-                playerData.Car.SetTireType(tireInput , out isValid);
-            }
-        }
-
+        string[] tireOptions = { "Soft", "Medium", "Hard", "Wet" };
+        int tireSelection = arrows.ShowArrowMenu("Choose type of tires:", tireOptions);
+        byte tireInput = (byte)(tireSelection + 1);
+        playerData.Car.SetTireType(tireInput);
 
         raceManager.RegisterCar(playerData);
         for (int i = 0; i < 5; i++)
@@ -60,23 +48,26 @@ class Program
         for (int lap = 1; lap <= totalLaps; lap++)
         {
             Console.Clear();
-            Console.WriteLine($"\nlap {lap}/{totalLaps}");
-            Console.WriteLine(new string('-', 50));
-
             if (playerCar.Dnf)
             {
-                System.Console.WriteLine($"You did not finish! \nRace is over!");
                 raceInterface.ShowFinalResults();
             }
+            else
+            {
+                if (playerCar.Dnf)
+                {
+                    System.Console.WriteLine($"You did not finish! \nRace is over!");
+                    raceInterface.ShowFinalResults();
+                }
+                raceInterface.AskPlayerPace();
+                if (lap != 1) { raceInterface.OfferPitStop(); }
+                raceInterface.SimulateLap();
+                raceInterface.ShowLapResults(lap , totalLaps);
+                raceInterface.ShowRaceStatistics();
 
-            raceInterface.AskPlayerPace();
-            raceInterface.OfferPitStop();
-            raceInterface.SimulateLap();
-            raceInterface.ShowLapResults();
-            raceInterface.ShowRaceStatistics();
-
-            System.Console.WriteLine("press any key to continue...");
-            Console.ReadKey();
+                System.Console.WriteLine("press any key to continue...");
+                Console.ReadKey();
+            }
         }
 
         raceInterface.ShowFinalResults();

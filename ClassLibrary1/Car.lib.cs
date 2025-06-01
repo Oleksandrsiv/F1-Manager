@@ -102,13 +102,12 @@ public class CarF1
     Pace = pace;
     }
     
-    public void SetTireType(byte typeOfTire, out bool isValid)
+    public void SetTireType(byte typeOfTire)
     {
-        isValid = true; 
+       
         if (typeOfTire < 1 || typeOfTire > 4)
         {
             Console.WriteLine("Invalid tire type! Choose between 1 (Soft), 2 (Medium), 3 (Hard) or 4 (Wet).");
-            isValid = false;
             return;
         }
         TypeOfTire = typeOfTire;
@@ -223,7 +222,7 @@ public class CarF1
 
        if (newTireType.HasValue && newTireType >= 1 && newTireType <= 4)
        {
-            SetTireType(newTireType.Value, out _);
+            SetTireType(newTireType.Value);
             _pitStopPenalty += 12;
        }
         
