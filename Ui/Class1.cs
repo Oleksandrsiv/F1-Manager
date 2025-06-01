@@ -250,18 +250,27 @@ public class Arrows
 
 public static class CarFactory
 {
+    const int DefaultTopSpeed = 310;
+    const int VariancePercent = 5;
+    const int TankCapacity = 100;
+    const double BaseFuelPerKm = 0.85;
+    const double StartingFuel = 90;
+    const byte DefaultPace = 2;
+    const byte DefaultTire = 1;
+    const byte FullTireCondition = 100;
+
     private static readonly Random _rand = new();
 
     public static CarF1 CreateRandomizedCar(string team)
     {
-        int topSpeed = ApplyVariance(310, 5); // base speed 310 
+        int topSpeed = ApplyVariance(DefaultTopSpeed, VariancePercent); 
         double mileage = 0.0;
-        byte pace = 2; // normal
-        int maxVolumeOfTank = ApplyVariance(100, 5); // 100 L
-        double baseFuelConsumption1km = ApplyVarianceDouble(0.85, 5); // fuel consumption 0.85 L/km
-        double amountOfFuel = ApplyVarianceDouble(90.0, 5); // start fuel
-        byte typeOfTire = 1; // Soft
-        byte tireCondition = 100;
+        byte pace = DefaultPace; 
+        int maxVolumeOfTank = ApplyVariance(TankCapacity, VariancePercent); 
+        double baseFuelConsumption1km = ApplyVarianceDouble(BaseFuelPerKm, VariancePercent); 
+        double amountOfFuel = ApplyVarianceDouble(StartingFuel, VariancePercent); 
+        byte typeOfTire = DefaultTire; 
+        byte tireCondition = FullTireCondition;
 
         return new CarF1(team, topSpeed, mileage, pace, maxVolumeOfTank, baseFuelConsumption1km, amountOfFuel, typeOfTire, tireCondition);
     }

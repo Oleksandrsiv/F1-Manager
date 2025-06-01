@@ -4,6 +4,8 @@ class Program
 {
     static void Main()
     {
+        const int numberOfBots = 5; 
+        
         Console.Clear();
         WeatherManager weatherManager = new WeatherManager();
         Track track = new Track(weatherManager);
@@ -33,9 +35,9 @@ class Program
         int tireSelection = arrows.ShowArrowMenu("Choose type of tires:", tireOptions);
         byte tireInput = (byte)(tireSelection + 1);
         playerData.Car.SetTireType(tireInput);
-
         raceManager.RegisterCar(playerData);
-        for (int i = 0; i < 5; i++)
+
+        for (int i = 0; i < numberOfBots; i++)
         {
             CarF1 aiCar = CarFactory.CreateRandomizedCar($"AI Team {i + 1}");
             CarRaceData aiData = new CarRaceData(aiCar);
@@ -44,32 +46,28 @@ class Program
 
         IRaceInterface raceInterface = new RaceInterface(playerData, raceManager, track, weatherManager, totalLaps);
 
-
         for (int lap = 1; lap <= totalLaps; lap++)
         {
             Console.Clear();
+
             if (playerCar.Dnf)
             {
+                System.Console.WriteLine($"You did not finish! \nRace is over!");
                 raceInterface.ShowFinalResults();
             }
-            else
-            {
-                if (playerCar.Dnf)
-                {
-                    System.Console.WriteLine($"You did not finish! \nRace is over!");
-                    raceInterface.ShowFinalResults();
-                }
-                raceInterface.AskPlayerPace();
-                if (lap != 1) { raceInterface.OfferPitStop(); }
-                raceInterface.SimulateLap();
-                raceInterface.ShowLapResults(lap , totalLaps);
-                raceInterface.ShowRaceStatistics();
+            raceInterface.AskPlayerPace();
+            if (lap != 1) { raceInterface.OfferPitStop(); }
+            raceInterface.SimulateLap();
+            raceInterface.ShowLapResults(lap, totalLaps);
+            raceInterface.ShowRaceStatistics();
 
-                System.Console.WriteLine("press any key to continue...");
-                Console.ReadKey();
-            }
+            System.Console.WriteLine("press any key to continue...");
+            Console.ReadKey();
         }
-
         raceInterface.ShowFinalResults();
+
     }
+
+        
 }
+

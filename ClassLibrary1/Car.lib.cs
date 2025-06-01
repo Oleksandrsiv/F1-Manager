@@ -137,7 +137,7 @@ public class CarF1
         1 => 0.9, // aggressive
         2 => 1.0, // normal
         3 => 1.3, // economic
-        _ => 1.0 // default to normal
+        _ => 0 // 
     };
 
     _tireMultiplier = (100 - TireCondition) / 100.0;
