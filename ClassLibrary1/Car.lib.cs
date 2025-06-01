@@ -135,9 +135,9 @@ public class CarF1
 
     _paceMultiplier = Pace switch
     {
-        1 => 0.9, // economic
+        1 => 0.9, // aggressive
         2 => 1.0, // normal
-        3 => 1.3, // aggressive
+        3 => 1.3, // economic
         _ => 1.0 // default to normal
     };
 
@@ -149,7 +149,7 @@ public class CarF1
         2 => (0.5, 1.0),  // medium
         3 => (0.2, 0.8),  // hard
         4 => (0.6, 0.6),  // wet
-        _ => (0.5, 1.0)   // default to medium
+        _ => (0, 0)   // 
     };
 
 
@@ -274,7 +274,6 @@ public static class IncidentManager
         }
         else
         {
-            // === 2. Звичайний ризик через знос ===
             if (car.TireCondition < 40)
             {
                 double tirePenalty = (40 - car.TireCondition) / 60.0; // from 0 to 1
@@ -405,7 +404,7 @@ public class RaceManager
         public WeatherManager Weather => _weatherManager;
     }
 
-    //
+
 
     public class LapSimulator
     {

@@ -65,6 +65,7 @@ public class RaceInterface : IRaceInterface
             if (car != _playerData && !car.Car.Dnf)
             {
                 _aiController.AiMakeDecision(car, _track, _weather, _currentLap, _totalLaps);
+                Console.WriteLine($"[AI] {car.Car.Team} | Pace: {car.Car.Pace} | Tire: {car.Car.TypeOfTire} | TireCond: {car.Car.TireCondition:F1}% | Fuel: {car.Car.CurrentAmountOfFuel:F1}L");
             }
         }
 
@@ -142,7 +143,7 @@ public class RaceInterface : IRaceInterface
         }
 
         //fuel 
-        double fuelToAdd = 0;
+        double fuelToAdd;
         double availableSpace = _playerData.Car.MaxVolumeOfTank - _playerData.Car.CurrentAmountOfFuel;
 
         while (true)
@@ -195,41 +196,49 @@ public class RaceInterface : IRaceInterface
 
 
     public void ShowLapResults()
+{
+    var rankedCars = _raceManager.GetSortedCars();
+    double leaderTime = rankedCars.First().TotalRaceTime;
+
+    foreach (var car in rankedCars)
     {
-        var rankedCars = _raceManager.GetSortedCars();
+        string lapTimeText;
+        string gapText = "";
 
-        foreach (var car in rankedCars)
+        if (car.Car.Dnf)
         {
-            string status;
-            if (car.Car.Dnf)
-            {
-                status = "DNF";
-                Console.ForegroundColor = ConsoleColor.Gray;
-            }
-            else
-            {
-                double diff = car.LastLapTime - car.PreviousLapTime;
-
-                if (Math.Abs(diff) <= 0.5)
-                {
-                    Console.ForegroundColor = ConsoleColor.White; //  +-0.5 - white
-                }
-                else if (diff < -0.5)
-                {
-                    Console.ForegroundColor = ConsoleColor.Green; // rather than ideal на >0.5
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;   // slower than ideal на >0.5
-                }
-
-                status = $"{car.LastLapTime:F2}s ({car.Car.TireCondition}%)";
-            }
-
-            Console.WriteLine($"{car.Car.Team,-10} | Tire: {car.Car.GetTireName(),-6} | Time: {status}");
-            Console.ResetColor();
+            lapTimeText = "DNF";
+            Console.WriteLine($"{car.Car.Team,-10} | Tire: {car.Car.GetTireName(),-6} | Time: {lapTimeText}");
         }
+        else
+        {
+            lapTimeText = $"{car.LastLapTime:F2}s ({car.Car.TireCondition}%)";
+            Console.Write($"{car.Car.Team,-10} | Tire: {car.Car.GetTireName(),-6} | Time: {lapTimeText}");
+
+            if (car != rankedCars.First())
+            {
+                double gap = car.TotalRaceTime - leaderTime;
+                gapText = $"+{gap:F2}s";
+
+                // set gap color
+                if (gap <= 1)
+                    Console.ForegroundColor = ConsoleColor.Green;
+                else if (gap <= 3)
+                    Console.ForegroundColor = ConsoleColor.White;
+                else
+                    Console.ForegroundColor = ConsoleColor.Red;
+
+                Console.Write("  Gap: ");
+                Console.Write(gapText);
+                Console.ResetColor();
+            }
+
+            Console.WriteLine();
+        }
+
+        Console.ResetColor();
     }
+}
 
 
 }

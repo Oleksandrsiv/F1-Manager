@@ -10,3 +10,15 @@ C:\Users\Comp\VSC\CourseW\ClassLibrary1\obj\Debug\net8.0\refint\Car.Lib.dll
 C:\Users\Comp\VSC\CourseW\ClassLibrary1\obj\Debug\net8.0\Car.Lib.pdb
 C:\Users\Comp\VSC\CourseW\ClassLibrary1\obj\Debug\net8.0\ref\Car.Lib.dll
 C:\Users\Comp\VSC\CourseW\ClassLibrary1\obj\Debug\net8.0\Car.Lib.sourcelink.json
+C:\Users\Sasha\Documents\GitHub\F1-Manager\ClassLibrary1\bin\Debug\net8.0\Car.Lib.deps.json
+C:\Users\Sasha\Documents\GitHub\F1-Manager\ClassLibrary1\bin\Debug\net8.0\Car.Lib.dll
+C:\Users\Sasha\Documents\GitHub\F1-Manager\ClassLibrary1\bin\Debug\net8.0\Car.Lib.pdb
+C:\Users\Sasha\Documents\GitHub\F1-Manager\ClassLibrary1\obj\Debug\net8.0\Car.Lib.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Sasha\Documents\GitHub\F1-Manager\ClassLibrary1\obj\Debug\net8.0\Car.Lib.AssemblyInfoInputs.cache
+C:\Users\Sasha\Documents\GitHub\F1-Manager\ClassLibrary1\obj\Debug\net8.0\Car.Lib.AssemblyInfo.cs
+C:\Users\Sasha\Documents\GitHub\F1-Manager\ClassLibrary1\obj\Debug\net8.0\Car.Lib.csproj.CoreCompileInputs.cache
+C:\Users\Sasha\Documents\GitHub\F1-Manager\ClassLibrary1\obj\Debug\net8.0\Car.Lib.sourcelink.json
+C:\Users\Sasha\Documents\GitHub\F1-Manager\ClassLibrary1\obj\Debug\net8.0\Car.Lib.dll
+C:\Users\Sasha\Documents\GitHub\F1-Manager\ClassLibrary1\obj\Debug\net8.0\refint\Car.Lib.dll
+C:\Users\Sasha\Documents\GitHub\F1-Manager\ClassLibrary1\obj\Debug\net8.0\Car.Lib.pdb
+C:\Users\Sasha\Documents\GitHub\F1-Manager\ClassLibrary1\obj\Debug\net8.0\ref\Car.Lib.dll

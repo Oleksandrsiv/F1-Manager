@@ -22,13 +22,16 @@ public class AIController
         bool finalLaps = (totalLaps - currentLap) <= 2;
 
         // Decide Pace
-        if (car.TireCondition > 70 && car.CurrentAmountOfFuel > track.LengthKm * 2 && !badWeather)
+        double fuelFor2Laps = track.LengthKm * 2 * car.FuelConsumption1km;
+        double fuelFor1_5Lap = track.LengthKm * 1.5 * car.FuelConsumption1km;
+
+        if (car.TireCondition > 50 && car.CurrentAmountOfFuel > fuelFor2Laps && !badWeather)
         {
-            car.Pace = 3; // aggressive
+            car.Pace = 1; // aggressive
         }
-        else if (car.TireCondition < 40 || car.CurrentAmountOfFuel < track.LengthKm * 1.5)
+        else if (car.TireCondition < 40 || car.CurrentAmountOfFuel < fuelFor1_5Lap)
         {
-            car.Pace = 1; // economic
+            car.Pace = 3; // economic
         }
         else
         {

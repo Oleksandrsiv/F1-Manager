@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "0r4o3A08xgY=",
+  "dgSpecHash": "J6emYHWfrmo=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Comp\\VSC\\CourseW\\Ui\\Ui.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\Sasha\\Documents\\GitHub\\F1-Manager\\Ui\\Ui.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Sasha\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.15\\microsoft.netcore.app.ref.8.0.15.nupkg.sha512",
+    "C:\\Users\\Sasha\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.15\\microsoft.windowsdesktop.app.ref.8.0.15.nupkg.sha512",
+    "C:\\Users\\Sasha\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.15\\microsoft.aspnetcore.app.ref.8.0.15.nupkg.sha512"
+  ],
   "logs": []
 }
