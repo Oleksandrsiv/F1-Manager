@@ -1,28 +1,24 @@
-﻿using CarsLib;
+﻿using System.Text;
+using RaceLib.Car;
+using RaceLib.UI;
 
 class Program
 {
     static void Main()
     {
+        Console.InputEncoding = Encoding.UTF8;
+        Console.OutputEncoding = Encoding.UTF8;
+
         const int numberOfBots = 5;
         Console.Clear();
-        IWeatherManager weatherManager = new WeatherManager ();
+
+        IWeatherManager weatherManager = new WeatherManager();
         Track track = new Track(weatherManager);
         Arrows arrows = new Arrows();
 
-        Console.WriteLine("Welcome!");
-        int totalLaps;
-        while (true)
-        {
-            Console.Write("Enter count of laps: ");
-            string input = Console.ReadLine();
+        Console.WriteLine("Welcome to F1 Race!");
 
-            if (int.TryParse(input, out totalLaps) && totalLaps > 0)
-                break;
-
-            Console.WriteLine("Invalid input. Please enter a positive integer.");
-        }
-
+        int totalLaps = GetNumberFromMenu("Select number of laps:", new[] { "5", "10", "15","20"});
         Console.Write("Enter name of your team: ");
         string teamName = Console.ReadLine();
 
@@ -31,17 +27,15 @@ class Program
         RaceManager raceManager = new RaceManager();
 
         string[] tireOptions = { "Soft", "Medium", "Hard", "Wet" };
-        System.Console.WriteLine(weatherManager.CurrentWeather);
-        int tireSelection = arrows.ShowArrowMenu("Choose type of tires:", tireOptions);
-        byte tireInput = (byte)(tireSelection + 1);
-        playerData.Car.SetTireType(tireInput);
+        Console.WriteLine($"Weather: {weatherManager.CurrentWeather}");
+        int tireSelection = arrows.ShowArrowMenu($"Weather: {weatherManager.CurrentWeather}\nChoose tire type:", tireOptions);
+        playerData.Car.SetTireType((byte)(tireSelection + 1));
         raceManager.RegisterCar(playerData);
 
         for (int i = 0; i < numberOfBots; i++)
         {
-            CarF1 aiCar = CarFactory.CreateRandomizedCar($"AI Team {i + 1}");
-            CarRaceData aiData = new CarRaceData(aiCar);
-            raceManager.RegisterCar(aiData);
+            var ai = CarFactory.CreateRandomizedCar($"AI Team {i + 1}");
+            raceManager.RegisterCar(new CarRaceData(ai));
         }
 
         IRaceInterface raceInterface = new RaceInterface(playerData, raceManager, track, (WeatherManager)weatherManager, totalLaps);
@@ -52,25 +46,30 @@ class Program
 
             if (playerCar.Dnf)
             {
-                System.Console.WriteLine($"You did not finish!");
+                Console.WriteLine("You did not finish!");
                 raceInterface.ShowFinalResults();
+                return;
             }
+
             raceInterface.AskPlayerPace();
             if (lap != 1)
-            {
                 raceInterface.OfferPitStop();
-            }
+
             raceInterface.SimulateLap();
             raceInterface.ShowLapResults(lap, totalLaps);
             raceInterface.ShowRaceStatistics();
 
-            System.Console.WriteLine("press any key to continue...");
+            Console.WriteLine("\nPress any key to continue...");
             Console.ReadKey();
         }
-        raceInterface.ShowFinalResults();
 
+        raceInterface.ShowFinalResults();
     }
 
-        
+    static int GetNumberFromMenu(string title, string[] options)
+    {
+        Arrows arrows = new Arrows();
+        int selectedIndex = arrows.ShowArrowMenu(title, options);
+        return int.Parse(options[selectedIndex]);
+    }
 }
-

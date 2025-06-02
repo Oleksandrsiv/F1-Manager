@@ -1,6 +1,7 @@
-﻿namespace CarsLib;
+﻿namespace RaceLib.UI;
 
-using CarsLib;
+using RaceLib.Car;
+using RaceLib.AI;
 
 public interface IRaceInterface
 {
@@ -156,7 +157,7 @@ public class RaceInterface : IRaceInterface
             Console.WriteLine($"{position++}. {car.Car.Team,-10} | Result: {result}");
         }
     }
-
+    
 
     public void ShowLapResults(int lap, int totalLaps)
     {

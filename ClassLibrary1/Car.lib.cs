@@ -1,4 +1,4 @@
-﻿namespace CarsLib;
+﻿namespace RaceLib.Car;
 
 public interface ICarF1
 {
@@ -50,7 +50,7 @@ public class Track
         public Track(IWeatherManager weatherManager)
         {
             // length of track
-            LengthKm = Math.Round(random.NextDouble() * (7 - 3) + 3, 2);///////////////
+            LengthKm = Math.Round(random.NextDouble() * (7 - 3) + 3, 2);
 
             // turns
             EasyTurns = random.Next(5, 15);
@@ -138,7 +138,6 @@ public class CarF1: ICarF1
 
     if (pace < 1 || pace > 3)
     {
-        Console.WriteLine("invalid pace! Choose between 1 (Economic), 2 (Normal) or 3 (Aggressive).");
         isValid = false;
         return;
     }
@@ -151,7 +150,6 @@ public class CarF1: ICarF1
        
         if (typeOfTire < 1 || typeOfTire > 4)
         {
-            Console.WriteLine("Invalid tire type! Choose between 1 (Soft), 2 (Medium), 3 (Hard) or 4 (Wet).");
             return;
         }
         TypeOfTire = typeOfTire;
@@ -192,7 +190,7 @@ public class CarF1: ICarF1
         2 => (MediumTireConsumption, MediumTireWear),  // medium
         3 => (HardTireConsumption, HardTireWear),  // hard
         4 => (WetTireConsumption, WetTireWear),  // wet
-        _ => (0, 0)   // 
+        _ => throw new Exception("invalid option")
     };
 
 

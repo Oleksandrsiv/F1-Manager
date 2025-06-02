@@ -1,4 +1,7 @@
-﻿using CarsLib;
+﻿namespace RaceLib.AI;
+
+
+using RaceLib.Car;
 
 public class AIController
 {
@@ -19,7 +22,7 @@ public class AIController
             (car.TypeOfTire <= 3 && isWetWeather) ||     // dry tires in wet
             (car.TypeOfTire == 4 && !isWetWeather);      // wet tires in dry
 
-        bool finalLaps = (totalLaps - currentLap) <= 2;
+        bool finalLaps = (totalLaps - currentLap) <= 1;
 
         // Decide Pace
         double fuelFor2Laps = track.LengthKm * 2 * car.FuelConsumption1km;
