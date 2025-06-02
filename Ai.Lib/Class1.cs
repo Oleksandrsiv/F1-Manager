@@ -3,7 +3,7 @@
 public class AIController
 {
 
-    public void AiMakeDecision(CarRaceData carData, Track track, WeatherManager weatherManager, int currentLap, int totalLaps)
+    public void AiMakeDecision(CarRaceData carData, Track track, IWeatherManager weatherManager, int currentLap, int totalLaps)
     {
         var car = carData.Car;
 

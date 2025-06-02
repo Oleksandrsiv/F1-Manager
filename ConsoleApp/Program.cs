@@ -4,10 +4,9 @@ class Program
 {
     static void Main()
     {
-        const int numberOfBots = 5; 
-        
+        const int numberOfBots = 5;
         Console.Clear();
-        WeatherManager weatherManager = new WeatherManager();
+        IWeatherManager weatherManager = new WeatherManager ();
         Track track = new Track(weatherManager);
         Arrows arrows = new Arrows();
 
@@ -27,11 +26,12 @@ class Program
         Console.Write("Enter name of your team: ");
         string teamName = Console.ReadLine();
 
-        CarF1 playerCar = new CarF1(teamName, 310, 0, 2, 100, 0.85, 90, 2, 100);
+        CarF1 playerCar = new CarF1(teamName, 310, 100, 0.85, 100, 2, 100);
         CarRaceData playerData = new CarRaceData(playerCar);
         RaceManager raceManager = new RaceManager();
 
         string[] tireOptions = { "Soft", "Medium", "Hard", "Wet" };
+        System.Console.WriteLine(weatherManager.CurrentWeather);
         int tireSelection = arrows.ShowArrowMenu("Choose type of tires:", tireOptions);
         byte tireInput = (byte)(tireSelection + 1);
         playerData.Car.SetTireType(tireInput);
@@ -44,7 +44,7 @@ class Program
             raceManager.RegisterCar(aiData);
         }
 
-        IRaceInterface raceInterface = new RaceInterface(playerData, raceManager, track, weatherManager, totalLaps);
+        IRaceInterface raceInterface = new RaceInterface(playerData, raceManager, track, (WeatherManager)weatherManager, totalLaps);
 
         for (int lap = 1; lap <= totalLaps; lap++)
         {
@@ -52,11 +52,14 @@ class Program
 
             if (playerCar.Dnf)
             {
-                System.Console.WriteLine($"You did not finish! \nRace is over!");
+                System.Console.WriteLine($"You did not finish!");
                 raceInterface.ShowFinalResults();
             }
             raceInterface.AskPlayerPace();
-            if (lap != 1) { raceInterface.OfferPitStop(); }
+            if (lap != 1)
+            {
+                raceInterface.OfferPitStop();
+            }
             raceInterface.SimulateLap();
             raceInterface.ShowLapResults(lap, totalLaps);
             raceInterface.ShowRaceStatistics();

@@ -1,57 +1,85 @@
 ﻿namespace CarsLib;
 
-
-public class Track
+public interface ICarF1
 {
-    public double LengthKm { get; private set; }
-    public int EasyTurns { get; private set; }
-    public int MediumTurns { get; private set; }
-    public int HardTurns { get; private set; }
+    string Team { get; }
+    double TopSpeed { get; }
+    byte Pace { get; set; } 
+    int MaxVolumeOfTank { get; }
+    double CurrentAmountOfFuel { get; }
+    byte TypeOfTire { get; }
+    byte TireCondition { get; }
+    bool Dnf { get; set; }
+    double FuelConsumption1km { get; } 
+    double TireConsumption1km { get; } 
 
-    private const double EasyTurnPenalty = 0.5;
-    private const double MediumTurnPenalty = 1.5;
-    private const double HardTurnPenalty = 3.0;
+    void SetPace(byte pace, out bool isValid);
+    void SetTireType(byte typeOfTire);
+    string GetTireName();
+    void SetMultipliers(IWeatherManager weatherManager); 
+    bool Ride(double distanceKm);
+    bool Refill(double amountOfRefilledFuel);
+    void PitStop(double amountOfRefilledFuel, IWeatherManager weatherManager, byte? newTireType = null);
+    double CalculateLapTime(double idealTime);
+}
 
-    private static Random random = new Random();
-    private WeatherManager _weatherManager;
+public interface IWeatherManager
+{
+    string CurrentWeather { get; }
+    byte TemperatureCelsius { get; }
 
-    public Track(WeatherManager weatherManager)
-    {
-        // length of track
-        LengthKm = Math.Round(random.NextDouble() * (7 - 3) + 3, 2);//check
-
-        // turns
-        EasyTurns = random.Next(5, 15);
-        MediumTurns = random.Next(3, 10);
-        HardTurns = random.Next(1, 5);
-
-        _weatherManager = weatherManager;
-        _weatherManager.GenerateWeather();
-    }
-
-
-
-
-    // ideal time 
-    public double CalculateIdealTime(double baseSpeedKmh)
-    {
-        // time without penalty
-        double baseTimeMin = LengthKm / baseSpeedKmh * 60;
-
-
-        // time with penalty by corners
-        double timeWithTurnPenalty = (EasyTurns * EasyTurnPenalty) + (MediumTurns * MediumTurnPenalty) + (HardTurns * HardTurnPenalty);
-        
-        return baseTimeMin + timeWithTurnPenalty;
-    }
+    void GenerateWeather();
+    bool UpdateWeather(List<CarRaceData> cars); 
 }
 
 
-public class CarF1
+public class Track
+    {
+        public double LengthKm { get; private set; }
+        public int EasyTurns { get; private set; }
+        public int MediumTurns { get; private set; }
+        public int HardTurns { get; private set; }
+
+        private const double EasyTurnPenalty = 0.5;
+        private const double MediumTurnPenalty = 1.5;
+        private const double HardTurnPenalty = 3.0;
+
+        private static Random random = new Random();
+        private IWeatherManager _weatherManager;
+
+        public Track(IWeatherManager weatherManager)
+        {
+            // length of track
+            LengthKm = Math.Round(random.NextDouble() * (7 - 3) + 3, 2);///////////////
+
+            // turns
+            EasyTurns = random.Next(5, 15);
+            MediumTurns = random.Next(3, 10);
+            HardTurns = random.Next(1, 5);
+
+            _weatherManager = weatherManager;
+            _weatherManager.GenerateWeather();
+        }
+
+        // ideal time 
+        public double CalculateIdealTime(double baseSpeedKmh)
+        {
+            // time without penalty
+            double baseTimeMin = LengthKm / baseSpeedKmh * 60;
+
+
+            // time with penalty by corners
+            double timeWithTurnPenalty = (EasyTurns * EasyTurnPenalty) + (MediumTurns * MediumTurnPenalty) + (HardTurns * HardTurnPenalty);
+
+            return baseTimeMin + timeWithTurnPenalty;
+        }
+    }
+
+
+public class CarF1: ICarF1
 {
     public string Team { get; private set; }
     public double TopSpeed { get; private set; }
-    public double Mileage { get; private set; }
     public byte Pace { get;  set; }
 
     //fuel
@@ -69,19 +97,35 @@ public class CarF1
     private double _typeWearMultiplier;
     private byte _pitStopPenalty = 0;
 
-    public bool Dnf = false;
+     public bool Dnf { get; set; }
     public bool IsPitStop = false;
     
+    // Penalty for pit stop
+    private const double PitStopPenaltySeconds = 2.0;
+
+    //pace
+    private const double aggressivePace = 0.9 ;
+    private const double normalPace = 1 ;
+    private const double economicPace = 1.3 ;
+    
+    // Tire wear
+    private const double SoftTireWear = 1.2;
+    private const double SoftTireConsumption = 0.8;
+    
+    private const double MediumTireWear = 1;
+    private const double MediumTireConsumption = 0.5;
+
+    private const double HardTireWear = 0.8;
+    private const double HardTireConsumption = 0.2;
+
+    private const double WetTireWear = 0.6;
+    private const double WetTireConsumption = 0.5;
 
 
-    public CarF1(string team, int topSpeed, double mileage, byte pace,
-        int maxVolumeOfTank, double baseFuelConsumption1km, double amountOfFuel,
-        byte typeOfTire, byte tireCondition)
+    public CarF1(string team, int topSpeed, int maxVolumeOfTank, double baseFuelConsumption1km, double amountOfFuel, byte typeOfTire, byte tireCondition)
     {
         Team = team;
         TopSpeed = topSpeed;
-        Mileage = mileage;
-        Pace = pace;
         MaxVolumeOfTank = maxVolumeOfTank;
         BaseFuelConsumption1km = baseFuelConsumption1km;
         CurrentAmountOfFuel = amountOfFuel;
@@ -126,7 +170,7 @@ public class CarF1
         };
     }
 
-    public void SetMultipliers(WeatherManager weatherManager)
+    public void SetMultipliers(IWeatherManager weatherManager)
     {
     var temperature = weatherManager.TemperatureCelsius;
     var weather = weatherManager.CurrentWeather;
@@ -134,9 +178,9 @@ public class CarF1
 
     _paceMultiplier = Pace switch
     {
-        1 => 0.9, // aggressive
-        2 => 1.0, // normal
-        3 => 1.3, // economic
+        1 => aggressivePace,
+        2 => normalPace, 
+        3 => economicPace, 
         _ => 0 // 
     };
 
@@ -144,10 +188,10 @@ public class CarF1
 
     (_baseTireConsumption, _typeWearMultiplier) = TypeOfTire switch // S M H W | 1 2 3 4
     {
-        1 => (0.8, 1.2),  // soft
-        2 => (0.5, 1.0),  // medium
-        3 => (0.2, 0.8),  // hard
-        4 => (0.6, 0.6),  // wet
+        1 => (SoftTireConsumption, SoftTireWear),  // soft
+        2 => (MediumTireConsumption, MediumTireWear),  // medium
+        3 => (HardTireConsumption, HardTireWear),  // hard
+        4 => (WetTireConsumption, WetTireWear),  // wet
         _ => (0, 0)   // 
     };
 
@@ -184,7 +228,6 @@ public class CarF1
          return false;
         }
         CurrentAmountOfFuel -= fuelNeeded;
-        Mileage += distanceKm;
         double tireWear = TireConsumption1km * distanceKm; 
         TireCondition = (byte)Math.Max(0, TireCondition - tireWear);
         return true;
@@ -194,13 +237,11 @@ public class CarF1
     {
     if (amountOfRefilledFuel <= 0)
     {
-        Console.WriteLine("Refill amount must be positive!");
         return false;
     }
 
     if (CurrentAmountOfFuel + amountOfRefilledFuel > MaxVolumeOfTank)
     {
-        Console.WriteLine("Incorrect volume! Fuel tank overflow.");
         return false;
     }
 
@@ -208,8 +249,7 @@ public class CarF1
     return true;
     }
 
-
-    public void PitStop(double amountOfRefilledFuel,WeatherManager weatherManager, byte? newTireType = null)
+    public void PitStop(double amountOfRefilledFuel,IWeatherManager weatherManager, byte? newTireType = null)
     {
         IsPitStop = true;
         _pitStopPenalty = 0;
@@ -230,8 +270,6 @@ public class CarF1
 
         SetMultipliers(weatherManager);
     }
-
-
 
     public double CalculateLapTime(double idealTime)
     {
@@ -259,7 +297,7 @@ public static class IncidentManager
 {
     private static Random random = new Random();
 
-    public static bool CheckForIncident(CarF1 car, Track track, WeatherManager weather)
+    public static bool CheckForIncident(ICarF1 car, Track track, IWeatherManager weather)
     {
         double totalProbability = 0.0;
 
@@ -269,7 +307,7 @@ public static class IncidentManager
         if (tireMismatch)
         {
             // if rainy and without Wet  (from 20 to 40%)
-            totalProbability += 0.2 + ((100 - car.TireCondition) / 100.0) * 0.2;
+            totalProbability += 0.2 + (100 - car.TireCondition) / 100.0 * 0.2;
         }
         else
         {
@@ -288,23 +326,23 @@ public static class IncidentManager
 
 public class CarRaceData
 {
-    public CarF1 Car { get; private set; }
+     public ICarF1 Car { get; private set; }
     public double LastLapTime { get; private set; }
     public double TotalRaceTime { get; private set; }
     public double IdealLapTime { get;  set; }
     public double PreviousLapTime { get; private set; }
 
 
-    public CarRaceData(CarF1 car)
+    public CarRaceData(ICarF1 car) 
     {
         Car = car;
     }
 
-    public void UpdateList(double lapTime, Track track, WeatherManager weather)
+    public void UpdateList(double lapTime, Track track, IWeatherManager weather)
     {
-        Car.Dnf = IncidentManager.CheckForIncident(Car, track, weather); 
+        Car.Dnf = IncidentManager.CheckForIncident(Car, track, weather);
 
-        if (!Car.Dnf) 
+        if (!Car.Dnf)
         {
             PreviousLapTime = LastLapTime;
             LastLapTime = lapTime;
@@ -314,7 +352,7 @@ public class CarRaceData
 
 
     
-    public void SetMultipliers(WeatherManager weatherManager)
+    public void SetMultipliers(IWeatherManager weatherManager)
     {
     Car.SetMultipliers(weatherManager);
     }
@@ -332,7 +370,7 @@ public class RaceManager
         carsOnTrack.Clear();
         carsOnTrack.AddRange(sorted);
     }
-    
+
     public List<CarRaceData> GetSortedCars()
     {
         return carsOnTrack
@@ -341,10 +379,7 @@ public class RaceManager
             .ToList();
     }
 
-
-
-
-    public void ApplyMultipliersToAllCars(WeatherManager weatherManager)
+    public void ApplyMultipliersToAllCars(IWeatherManager weatherManager)
     {
         foreach (var car in carsOnTrack)
         {
@@ -356,11 +391,10 @@ public class RaceManager
     public IReadOnlyList<CarRaceData> CarsOnTrackReadOnly => carsOnTrack.AsReadOnly();
 }
 
-
     public class RaceSession
     {
         private readonly Track _track;
-        private readonly WeatherManager _weatherManager;
+        private readonly IWeatherManager _weatherManager;
         private readonly RaceManager _raceManager;
         private readonly LapSimulator _lapSimulator;
 
@@ -372,12 +406,12 @@ public class RaceManager
             _lapSimulator = new LapSimulator(_track, _weatherManager);
         }
 
-        public void RegisterCar(CarF1 car)
-        {
-            var raceData = new CarRaceData(car);
-            raceData.IdealLapTime = _track.CalculateIdealTime(car.TopSpeed);
-            _raceManager.RegisterCar(raceData);
-        }
+    public void RegisterCar(ICarF1 car)
+    {
+        var raceData = new CarRaceData(car); 
+        raceData.IdealLapTime = _track.CalculateIdealTime(car.TopSpeed);
+        _raceManager.RegisterCar(raceData);
+    }
 
         public bool SimulateLap()
         {
@@ -400,7 +434,7 @@ public class RaceManager
         public IReadOnlyList<CarRaceData> GetRaceData() => _raceManager.CarsOnTrackReadOnly;
 
         public Track Track => _track;
-        public WeatherManager Weather => _weatherManager;
+        public IWeatherManager Weather => _weatherManager;
     }
 
 
@@ -408,9 +442,9 @@ public class RaceManager
     public class LapSimulator
     {
         private readonly Track _track;
-        private readonly WeatherManager _weather;
+        private readonly IWeatherManager _weather;
 
-        public LapSimulator(Track track, WeatherManager weather)
+        public LapSimulator(Track track, IWeatherManager weather)
         {
             _track = track;
             _weather = weather;
@@ -433,7 +467,7 @@ public class RaceManager
         }
     }
 
-    public class WeatherManager
+    public class WeatherManager: IWeatherManager
     {
         private static Random random = new Random();
         public string CurrentWeather { get; private set; }
@@ -492,27 +526,6 @@ public class RaceManager
             return 100 + (2 + sign) * diff;  
         }   
     } 
-
-
-
- /*
-    to do list:
-    pit                                 | +
-    check sim lap                       | +
-    check ideal lap time                | +   
-    UI | user interface                 | +
-    AI | artificial intelligence        | 
-    weather                             | + by tire
-    accident dnf                        | +
-    time list like per lap and general  | + 
-    add wet tire                        | +
-    tire bug fix                        | +
-
-    ai
-    ui
-    main
-    tech
-*/
 
 
 

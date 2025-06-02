@@ -10,8 +10,8 @@ public interface IRaceInterface
     void OfferPitStop();
     void ShowFinalResults();
     void ShowLapResults(int lap, int totalLaps);
-
 }
+
 public class RaceInterface : IRaceInterface
 {
     private readonly CarRaceData _playerData;
@@ -96,7 +96,7 @@ public class RaceInterface : IRaceInterface
         if (confirm != 0)
         {
             Console.WriteLine("You pass the pit lane.\n");
-            Thread.Sleep(500);
+            Thread.Sleep(200);
             return;
         }
 
@@ -223,7 +223,7 @@ public class Arrows
             {
                 if (i == selectedIndex)
                 {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.ForegroundColor = ConsoleColor.Yellow; 
                     Console.WriteLine($"> {options[i]}");
                     Console.ResetColor();
                 }
@@ -255,7 +255,6 @@ public static class CarFactory
     const int TankCapacity = 100;
     const double BaseFuelPerKm = 0.85;
     const double StartingFuel = 90;
-    const byte DefaultPace = 2;
     const byte DefaultTire = 1;
     const byte FullTireCondition = 100;
 
@@ -264,16 +263,15 @@ public static class CarFactory
     public static CarF1 CreateRandomizedCar(string team)
     {
         int topSpeed = ApplyVariance(DefaultTopSpeed, VariancePercent); 
-        double mileage = 0.0;
-        byte pace = DefaultPace; 
         int maxVolumeOfTank = ApplyVariance(TankCapacity, VariancePercent); 
         double baseFuelConsumption1km = ApplyVarianceDouble(BaseFuelPerKm, VariancePercent); 
         double amountOfFuel = ApplyVarianceDouble(StartingFuel, VariancePercent); 
         byte typeOfTire = DefaultTire; 
         byte tireCondition = FullTireCondition;
 
-        return new CarF1(team, topSpeed, mileage, pace, maxVolumeOfTank, baseFuelConsumption1km, amountOfFuel, typeOfTire, tireCondition);
+        return new CarF1(team, topSpeed, maxVolumeOfTank, baseFuelConsumption1km, amountOfFuel, typeOfTire, tireCondition);
     }
+
 
     private static int ApplyVariance(int baseValue, int percent)
     {
